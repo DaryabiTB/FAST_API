@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -5,10 +7,12 @@ app = FastAPI()
 
 
 # post model validates the data
-class post_model(BaseModel):
+class Post_Model(BaseModel):
     title: str
     content: str
-    # author: str
+    published: bool = True  # default, it is an optional field and it only accepts boolean
+    author: Optional[str] = None  # default, it is an optional field and it only accepts string
+    rating: Optional[int] = None  # default, it is an optional field and it only accepts integer
     # tags: list
 
 
@@ -23,5 +27,6 @@ async def hello(name: str):
 
 
 @app.post("/create_post")
-def create_post(post: post_model):
-    return {"message": f"created post: {post.title}"}
+def create_post(post: Post_Model):
+    print(post.dict())  # convert pydantic model to dict
+    return {"message": f"created post: {post.dict()}"}
