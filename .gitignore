@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-/app/.env_sec
+/app/.env_sec/
 
 __pycache__/
 *.py[cod]
