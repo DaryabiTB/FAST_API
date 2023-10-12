@@ -6,6 +6,8 @@ from starlette import status
 from app.sql_app_post.crud_operations import post_crud as crud
 from app.sql_app_post import schema
 from app.sql_app_post.database import get_db
+from app.sql_app_post.routes import oauth2
+from app.sql_app_post.routes.oauth2 import get_current_user
 
 router = APIRouter(
 	prefix="/posts",
@@ -24,7 +26,7 @@ def read_posts(db: Session = Depends(get_db)):
 
 
 @router.get("/{id}", response_model=schema.return_post, status_code=status.HTTP_200_OK)
-def read_post_by_id(id: int, db: Session = Depends(get_db), skip: int = 0, limit: int | None = None):
+def read_post_by_id(id: int, db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
 	post = crud.read_post_by_id(db, id)
 	if post:
 		return post
@@ -34,7 +36,9 @@ def read_post_by_id(id: int, db: Session = Depends(get_db), skip: int = 0, limit
 
 # tested and works
 @router.post("/", response_model=schema.return_post, status_code=status.HTTP_201_CREATED)
-def create_post(post: schema.create_post, db: Session = Depends(get_db)):
+def create_post(post: schema.create_post, db: Session = Depends(get_db),
+                current_user: str = Depends(oauth2.get_current_user)):
+	print("get_current_use", get_current_user)
 	created_post = crud.create_post(db, post=post)
 	if created_post is None:
 		raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
@@ -42,7 +46,8 @@ def create_post(post: schema.create_post, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=schema.return_post, status_code=status.HTTP_202_ACCEPTED)
-def update_post(id: int, post: schema.create_post, db: Session = Depends(get_db)):
+def update_post(id: int, post: schema.create_post, db: Session = Depends(get_db),
+                current_user: str = Depends(oauth2.get_current_user)):
 	updated_post = crud.update_post(db, id, post)
 	if updated_post is None:
 		raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -51,7 +56,7 @@ def update_post(id: int, post: schema.create_post, db: Session = Depends(get_db)
 
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-def read_post_by_id(id: int, db: Session = Depends(get_db)):
+def read_post_by_id(id: int, db: Session = Depends(get_db), get_current_user: str = Depends(oauth2.get_current_user)):
 	post = crud.delete_post_by_id(db, id)
 	if post:
 		return {"message": f"post with ID {id} was deleted"}

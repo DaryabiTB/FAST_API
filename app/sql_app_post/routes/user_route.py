@@ -39,8 +39,8 @@ def read_user(user_identifier: str = Query(..., title="User Identifier (Email or
 # 	if db_user is None:
 # 		raise HTTPException(status_code=404, detail="User not found")
 # 	return db_user
-#
-#
+
+
 # @app.get("/users/{id}", response_model=schema.return_user, status_code=status.HTTP_200_OK)
 # def read_user(id: int, db: Session = Depends(get_db)):
 # 	db_user = crud.get_user_by_email(db, email=None, id=id)

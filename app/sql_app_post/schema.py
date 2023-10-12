@@ -38,3 +38,18 @@ class return_user(base_user):
 	class Config:
 		orm_mode = True
 		extra = "allow"
+
+
+class UserLogin(BaseModel):
+	email: EmailStr
+	password: str
+
+
+class Token(BaseModel):
+	access_token: str
+	token_type: str
+
+
+# what we embed in the token
+class TokenData(BaseModel):
+	email: str = None

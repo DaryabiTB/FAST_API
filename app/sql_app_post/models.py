@@ -16,6 +16,8 @@ class Post(Base):
 	published = Column(Boolean, server_default='TRUE', default=False)
 	created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 	update_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+	# we need to send table_name instead of class name
+	owner_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
 	
 	def as_dict(self):
 		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
