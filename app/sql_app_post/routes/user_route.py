@@ -5,6 +5,7 @@ from starlette import status
 from app.sql_app_post import schema
 from app.sql_app_post.database import get_db
 from app.sql_app_post.crud_operations import user_crud as crud
+from app.sql_app_post.routes import oauth2
 
 router = APIRouter(
 	prefix="/users",
@@ -12,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=schema.return_user, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=schema.ReturnUser, status_code=status.HTTP_201_CREATED)
 def create_user(user: schema.create_user, db: Session = Depends(get_db)):
 	db_user = crud.get_user_by_email_or_ID(db, email=user.email, id=None)
 	if db_user:
@@ -20,7 +21,7 @@ def create_user(user: schema.create_user, db: Session = Depends(get_db)):
 	return crud.create_user(db=db, user=user)
 
 
-@router.get("/", response_model=schema.return_user, status_code=status.HTTP_200_OK)
+@router.get("/", response_model=schema.ReturnUser, status_code=status.HTTP_200_OK)
 def read_user(user_identifier: str = Query(..., title="User Identifier (Email or ID)"), db: Session = Depends(get_db)):
 	if user_identifier.isdigit():
 		# If the user_identifier is a number (assumed to be an ID), query by ID
@@ -32,6 +33,11 @@ def read_user(user_identifier: str = Query(..., title="User Identifier (Email or
 	if db_user is None:
 		raise HTTPException(status_code=404, detail="User not found")
 	return db_user
+
+
+@router.get("/me", response_model=schema.ReturnUser, status_code=status.HTTP_200_OK)
+def get_user_data(db: Session = Depends(get_db), current_user: schema.ReturnUser = Depends(oauth2.get_current_user)):
+	return current_user
 
 # @app.get("/users/{user_email}", response_model=schema.return_user, status_code=status.HTTP_200_OK)
 # def read_user(user_email: str, db: Session = Depends(get_db)):

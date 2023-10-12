@@ -4,48 +4,45 @@ from app.sql_app_post import models, schema
 from starlette import status
 
 
-def create_post(db: Session, post: schema.create_post):
-	db_post = models.Post(**post.dict())
+def create_post(db: Session, post: schema.create_post, current_user_id: int):
+	db_post = models.Post(owner_id=current_user_id, **post.dict())
 	db.add(db_post)
 	db.commit()
 	db.refresh(db_post)
 	return db_post
 
 
-def read_posts(db: Session):
-	try:
-		posts = db.query(models.Post).all()
-		if posts:
-			return posts
-		else:
-			return {"message": "No data found"}
-	except Exception as e:
-		return None
+def read_posts(db: Session, current_user_id: int):
+	posts = db.query(models.Post).filter(models.Post.owner_id == current_user_id).all()
+	return posts
 
 
-def read_post_by_id(db: Session, id: int):
+def read_post_by_id(db: Session, id: int, current_user_id: int):
 	try:
-		post = db.query(models.Post).filter(models.Post.id == id).first()
+		post = db.query(models.Post).filter(models.Post.id == id and models.Post.owner_id == current_user_id).first()
 		if post:
 			return post
 		else:
-			print("read_post_by_id", None)
 			return None
 	except Exception as e:
 		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internet server error")
 
 
-def delete_post_by_id(db: Session, id: int):
+def delete_post_by_id(db: Session, id: int, current_user_id: int):
 	try:
 		post = db.query(models.Post).filter(models.Post.id == id).first()
+		print("current_user_id", current_user_id)
 		if post:
+			if post.owner_id != current_user_id:
+				return -2
 			db.query(models.Post).filter(models.Post.id == id).delete(synchronize_session=False)
 			db.commit()
 			return post
 		else:
 			return None
-	except Exception as e:
-		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internet server error")
+	except HTTPException as e:
+		print("exception", e)
+		return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internet server error")
 
 
 #

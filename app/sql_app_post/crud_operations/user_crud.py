@@ -9,7 +9,7 @@ def get_user_by_email_or_ID(db, email, id):
 	try:
 		user = None
 		if id:
-			user = db.query(models.User).filter(models.User.id == id).first()
+			user = db.query(models.User).filter(models.User.user_id == id).first()
 		if email:
 			user = db.query(models.User).filter(models.User.email == email).first()
 		if user:

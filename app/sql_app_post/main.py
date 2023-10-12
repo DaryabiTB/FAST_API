@@ -11,7 +11,7 @@ models.Base.metadata.create_all(bind=engine)
 
 # Dependency
 
-app = FastAPI()
+app = FastAPI(debug=True)
 app.include_router(posts_route.router)
 app.include_router(user_route.router)
 app.include_router(login.auth_router)
