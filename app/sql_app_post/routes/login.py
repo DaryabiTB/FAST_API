@@ -15,7 +15,7 @@ auth_router = APIRouter(
 @auth_router.post('/login', status_code=status.HTTP_200_OK, response_model=schema.Token)
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 	# OAuth2PasswordRequestForm is a class that has username and password as attributes
-	user = user_crud.get_user_by_email_or_ID(db, user_credentials.username, id=None)
+	user = user_crud.get_user_by_email(db, user_credentials.username)
 	if not user:
 		raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
 	if not utils.verify_password(user_credentials.password, user.password):

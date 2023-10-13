@@ -34,3 +34,24 @@ class User(Base):
 	create_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 	is_active = Column(Boolean, server_default='TRUE', default=True)
 	posts = relationship("Post", back_populates="owner")
+	
+	def as_dict(self):
+		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+class Vote(Base):
+	__tablename__ = "votes"
+	
+	vote_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+	vote_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+	
+	# we need to send table_name instead of class name
+	post_id = Column(Integer, ForeignKey("posts.post_id", ondelete='CASCADE'), nullable=False, primary_key=True)
+	# post = relationship("Post", back_populates="votes")
+	
+	user_id = Column(Integer, ForeignKey("users.user_id", ondelete='CASCADE'), nullable=False, primary_key=True)
+	
+	# user = relationship("User", back_populates="votes")
+	
+	def as_dict(self):
+		return {c.name: getattr(self, c.name) for c in self.__table__.columns}
